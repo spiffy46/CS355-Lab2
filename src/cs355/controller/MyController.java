@@ -1,7 +1,6 @@
 package cs355.controller;
 
 import java.awt.Color;
-import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.io.File;
@@ -17,7 +16,7 @@ public class MyController implements CS355Controller{
 	Shape currentShape;
 	List<Shape> shapeList;
 	public Color col = Color.white;
-	public String shape = "";
+	public String button = "";
 	public Point2D.Double p1;
 	public Point2D.Double p2;
 	public int triangleCount = 0;
@@ -31,17 +30,17 @@ public class MyController implements CS355Controller{
 	@Override
 	public void mousePressed(MouseEvent e) {
 		p1 = new Point2D.Double(e.getPoint().getX(),e.getPoint().getY());
-		if (shape == "line"){
+		if (button == "line"){
 			currentShape = new Line(col,p1,p1);
-		}else if(shape == "square"){
+		}else if(button == "square"){
 			currentShape = new Square(col,p1,0);
-		}else if(shape == "rectangle"){
+		}else if(button == "rectangle"){
 			currentShape = new Rectangle(col,p1,0,0);
-		}else if(shape == "circle"){
+		}else if(button == "circle"){
 			currentShape = new Circle(col,p1,0);
-		}else if(shape == "ellipse"){
+		}else if(button == "ellipse"){
 			currentShape = new Ellipse(col,p1,0,0);
-		}else if (shape == "triangle"){
+		}else if (button == "triangle"){
 			if (triangleCount == 0){
 				t1 = new Point2D.Double(e.getPoint().getX(),e.getPoint().getY());
 				triangleCount++;
@@ -50,10 +49,15 @@ public class MyController implements CS355Controller{
 				triangleCount++;
 			}else{
 				t3 = new Point2D.Double(e.getPoint().getX(),e.getPoint().getY());
+				Point2D.Double center = new Point2D.Double();
+				center.setLocation((t1.getX()+t2.getX()+t3.getX())/3, (t1.getY()+t2.getY()+t3.getY())/3);
 				triangleCount = 0;
-				Shape t = new Triangle(col,t1,t2,t3);
+				Shape t = new Triangle(col,center,t1,t2,t3);
 				model.addShape(t);
 			}	
+			return;
+		}else if (button == "select"){
+			Shape selected = model.geometryTest(e.getPoint(), 4);
 			return;
 		}else{
 			return;
@@ -74,13 +78,13 @@ public class MyController implements CS355Controller{
 	public void mouseDragged(MouseEvent e) {
 		p2 = new Point2D.Double(e.getPoint().getX(),e.getPoint().getY());
 		
-		if (shape == "line"){
+		if (button == "line"){
 			currentShape = model.getShape(model.getSize()-1);
 			Line l = (Line)currentShape;
 			l.setEnd(p2);
 			model.deleteShape(model.getSize()-1);
 			model.addShape(l);
-		}else if(shape == "square"){
+		}else if(button == "square"){
 			double size = Math.min((Math.abs(p1.getX()-p2.getX())),(Math.abs(p1.getY()-p2.getY())));
 			Point2D.Double upLeft = new Point2D.Double();
 			
@@ -93,25 +97,29 @@ public class MyController implements CS355Controller{
 			}else{
 				upLeft.setLocation(p1.getX()-size, p1.getY()-size);
 			}
+			Point2D.Double center = new Point2D.Double();
+			center.setLocation(upLeft.getX()+size/2, upLeft.getY()+size/2);
 			currentShape = model.getShape(model.getSize()-1);
 			Square s = (Square)currentShape;
-			s.setUpperLeft(upLeft);
+			s.setCenter(center);
 			s.setSize(size);
 			model.deleteShape(model.getSize()-1);
 			model.addShape(s);
-		}else if(shape == "rectangle"){
+		}else if(button == "rectangle"){
 			Point2D.Double upLeft = new Point2D.Double();
 			upLeft.setLocation(Math.min(p1.getX(), p2.getX()), Math.min(p1.getY(),p2.getY()));
 			Double width = Math.abs(p1.getX() - p2.getX());
 			Double height = Math.abs(p1.getY() - p2.getY());
 			currentShape = model.getShape(model.getSize()-1);
 			Rectangle r = (Rectangle)currentShape;
+			Point2D.Double center = new Point2D.Double();
+			center.setLocation(upLeft.getX()+width/2, upLeft.getY()+height/2);
 			r.setHeight(height);
 			r.setWidth(width);
-			r.setUpperLeft(upLeft);
+			r.setCenter(center);
 			model.deleteShape(model.getSize()-1);
 			model.addShape(r);
-		}else if(shape == "circle"){
+		}else if(button == "circle"){
 			double size = Math.min((Math.abs(p1.getX()-p2.getX())),(Math.abs(p1.getY()-p2.getY())));
 			double radius = size/2;
 			Point2D.Double upLeft = new Point2D.Double();
@@ -133,7 +141,7 @@ public class MyController implements CS355Controller{
 			c.setRadius(radius);
 			model.deleteShape(model.getSize()-1);
 			model.addShape(c);
-		}else if(shape == "ellipse"){
+		}else if(button == "ellipse"){
 			Point2D.Double center = new Point2D.Double();
 			center.setLocation((p1.getX() + p2.getX())/2, (p1.getY() + p2.getY())/2);
 			Double width = Math.abs(p1.getX() - p2.getX());
@@ -161,45 +169,44 @@ public class MyController implements CS355Controller{
 
 	@Override
 	public void lineButtonHit() {
-		shape = "line";
+		button = "line";
 		triangleCount = 0;
 	}
 
 	@Override
 	public void squareButtonHit() {
-		shape = "square";
+		button = "square";
 		triangleCount = 0;
 	}
 
 	@Override
 	public void rectangleButtonHit() {
-		shape = "rectangle";
+		button = "rectangle";
 		triangleCount = 0;
 	}
 
 	@Override
 	public void circleButtonHit() {
-		shape = "circle";
+		button = "circle";
 		triangleCount = 0;
 	}
 
 	@Override
 	public void ellipseButtonHit() {
-		shape = "ellipse";
+		button = "ellipse";
 		triangleCount = 0;
 	}
 
 	@Override
 	public void triangleButtonHit() {
-		shape = "triangle";
+		button = "triangle";
 		triangleCount = 0;
 	}
 
 	//Lab 2
 	@Override
 	public void selectButtonHit() {
-		// TODO Auto-generated method stub
-		
+		button = "select";
 	}
 
 	@Override

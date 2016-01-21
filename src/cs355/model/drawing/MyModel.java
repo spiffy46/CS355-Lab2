@@ -1,8 +1,12 @@
 package cs355.model.drawing;
 
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import cs355.GUIFunctions;
 
 public class MyModel extends CS355Drawing{
 
@@ -83,6 +87,57 @@ public class MyModel extends CS355Drawing{
 	
 	public int getSize() {
 		return shapeList.size();
+	}
+	
+	public Shape geometryTest(Point2D worldCoord, int tolerance) {
+		AffineTransform worldToObj = new AffineTransform();
+		Point2D.Double objCoord = new Point2D.Double();
+		List<Shape> reversed = this.getShapesReversed();
+		
+		for(int i = 0; i < reversed.size(); i++){
+			Shape s = reversed.get(i);
+			worldToObj.rotate(-s.getRotation());
+			worldToObj.translate(-s.getCenter().getX(), -s.getCenter().getY());
+			worldToObj.transform(worldCoord, objCoord);
+			GUIFunctions.printf(objCoord.toString());
+			if(s instanceof Line){
+				//TODO Finish Line selection
+				/*Line l = (Line)s;
+				if (Math.abs(objCoord.getX())<sq.getSize()/2+tolerance && Math.abs(objCoord.getY())<sq.getSize()/2+tolerance){
+					GUIFunctions.printf("Selected Line");
+					return sq;
+				}*/
+			} else if(s instanceof Square){
+				Square sq = (Square)s;
+				if (Math.abs(objCoord.getX())<sq.getSize()/2+tolerance && Math.abs(objCoord.getY())<sq.getSize()/2+tolerance){
+					GUIFunctions.printf("Selected Square");
+					return sq;
+				}
+			} else if(s instanceof Rectangle){
+				Rectangle r = (Rectangle)s;
+				if (Math.abs(objCoord.getX())<r.getWidth()/2+tolerance && Math.abs(objCoord.getY())<r.getHeight()/2+tolerance){
+					GUIFunctions.printf("Selected Rectangle");
+					return r;
+				}
+			} else if(s instanceof Circle){
+				Circle c = (Circle)s;
+				if (objCoord.getX()*objCoord.getX() + objCoord.getY()*objCoord.getY() < (c.getRadius()*c.getRadius())+tolerance){
+					GUIFunctions.printf("Selected Circle");
+					return c;
+				}
+			}else if(s instanceof Ellipse){
+				Ellipse el = (Ellipse)s;
+				double a = el.getWidth()/2+tolerance;
+				double b = el.getHeight()/2+tolerance;
+				if ((objCoord.getX()*objCoord.getX())/(a*a) + (objCoord.getY()*objCoord.getY())/(b*b) <= 1){
+					GUIFunctions.printf("Selected Ellipse");
+					return el;
+				}
+			}else if(s instanceof Triangle){
+				//TODO Finish Triangle
+			}else{}
+		}
+		return null;
 	}
 
 }
