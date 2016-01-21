@@ -203,10 +203,10 @@ public class MyController implements CS355Controller{
 		triangleCount = 0;
 	}
 
-	//Lab 2
 	@Override
 	public void selectButtonHit() {
 		button = "select";
+		triangleCount = 0;
 	}
 
 	@Override

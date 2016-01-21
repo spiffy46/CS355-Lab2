@@ -134,10 +134,28 @@ public class MyModel extends CS355Drawing{
 					return el;
 				}
 			}else if(s instanceof Triangle){
-				//TODO Finish Triangle
+				Triangle t = (Triangle)s;
+				Point2D.Double a = new Point2D.Double(t.getA().getX() - t.getCenter().getX(), t.getA().getY() - t.getCenter().getY());
+				Point2D.Double b = new Point2D.Double(t.getB().getX() - t.getCenter().getX(), t.getB().getY() - t.getCenter().getY());
+				Point2D.Double c = new Point2D.Double(t.getC().getX() - t.getCenter().getX(), t.getC().getY() - t.getCenter().getY());
+
+				double triArea = calcArea(a,b,c);
+				double a1 = calcArea(objCoord,b,c);
+				double a2 = calcArea(objCoord,a,c);
+				double a3 = calcArea(objCoord,a,b);
+				
+				if(a1 + a2 + a3 <= triArea) {
+					GUIFunctions.printf("Selected Triangle");
+					return t;
+				}
 			}else{}
 		}
 		return null;
+	}
+	
+	public double calcArea(Point2D A, Point2D B, Point2D C) {
+		double area = Math.abs(A.getX() * (B.getY()-C.getY()) + B.getX() * (C.getY() - A.getY()) + C.getX() * (A.getY() - B.getY()));
+		return area/2;
 	}
 
 }
