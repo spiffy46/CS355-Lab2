@@ -11,6 +11,7 @@ import cs355.GUIFunctions;
 public class MyModel extends CS355Drawing{
 
 	List<Shape> shapeList = new ArrayList<Shape>();
+	Shape selectedShape;
 	
 	@Override
 	public Shape getShape(int index) {
@@ -28,42 +29,49 @@ public class MyModel extends CS355Drawing{
 	@Override
 	public void deleteShape(int index) {
 		shapeList.remove(index);
+		setChanged();
+		notifyObservers();
 	}
 
 	@Override
 	public void moveToFront(int index) {
 		Shape s = shapeList.get(index);
 		shapeList.remove(index);
-		ArrayList<Shape> newList = new ArrayList<Shape>();
-		newList.add(s);
-		newList.addAll(shapeList);
+		shapeList.add(s);
+		setChanged();
+		notifyObservers();
 	}
 
 	@Override
 	public void movetoBack(int index) {
 		Shape s = shapeList.get(index);
 		shapeList.remove(index);
-		shapeList.add(s);
+		ArrayList<Shape> newList = new ArrayList<Shape>();
+		newList.add(s);
+		newList.addAll(shapeList);
+		shapeList = new ArrayList<Shape>(newList);
+		setChanged();
+		notifyObservers();
 	}
 
 	@Override
 	public void moveForward(int index) {
-		if(index != 0){
-			Shape s = shapeList.get(index);
-			Shape s1 = shapeList.get(index-1);
-			shapeList.set(index, s1);
-			shapeList.set(index-1, s);
-		}
+		Shape s = shapeList.get(index);
+		Shape s1 = shapeList.get(index+1);
+		shapeList.set(index, s1);
+		shapeList.set(index+1, s);
+		setChanged();
+		notifyObservers();
 	}
 
 	@Override
 	public void moveBackward(int index) {
-		if(index != shapeList.size()-1){
-			Shape s = shapeList.get(index);
-			Shape s1 = shapeList.get(index+1);
-			shapeList.set(index, s1);
-			shapeList.set(index+1, s);
-		}
+		Shape s = shapeList.get(index);
+		Shape s1 = shapeList.get(index-1);
+		shapeList.set(index, s1);
+		shapeList.set(index-1, s);
+		setChanged();
+		notifyObservers();
 	}
 
 	@Override
@@ -73,7 +81,7 @@ public class MyModel extends CS355Drawing{
 
 	@Override
 	public List<Shape> getShapesReversed() {
-		List<Shape> r = shapeList;
+		List<Shape> r = new ArrayList<Shape>(shapeList);
 		Collections.reverse(r);
 		return r;
 	}
@@ -89,49 +97,74 @@ public class MyModel extends CS355Drawing{
 		return shapeList.size();
 	}
 	
-	public Shape geometryTest(Point2D worldCoord, int tolerance) {
-		AffineTransform worldToObj = new AffineTransform();
+	public int geometryTest(Point2D worldCoord, int tolerance) {
 		Point2D.Double objCoord = new Point2D.Double();
-		List<Shape> reversed = this.getShapesReversed();
+		List<Shape> reversed = getShapesReversed();
 		
 		for(int i = 0; i < reversed.size(); i++){
+			AffineTransform worldToObj = new AffineTransform();
 			Shape s = reversed.get(i);
 			worldToObj.rotate(-s.getRotation());
 			worldToObj.translate(-s.getCenter().getX(), -s.getCenter().getY());
 			worldToObj.transform(worldCoord, objCoord);
 			GUIFunctions.printf(objCoord.toString());
 			if(s instanceof Line){
-				//TODO Finish Line selection
-				/*Line l = (Line)s;
-				if (Math.abs(objCoord.getX())<sq.getSize()/2+tolerance && Math.abs(objCoord.getY())<sq.getSize()/2+tolerance){
+				Line l = (Line)s;
+				Point2D.Double d = new Point2D.Double();
+				double x1 = l.getEnd().getX() - l.getCenter().getX();
+				double y1 = l.getEnd().getY() - l.getCenter().getY();
+				double x0 = 0;
+				double y0 = 0;
+				double lineLength = Math.sqrt((x1 - x0)*(x1 - x0) + (y1 - y0)*(y1 - y0));
+				d.setLocation((x1 - x0)/lineLength, (y1 - y0)/lineLength);
+				double t = (objCoord.getX()-x0)*d.getX() + (objCoord.getY()-y0)*d.getY();
+				Point2D.Double q = new Point2D.Double();
+				q.setLocation(x0 + t * d.getX(), y0 + t * d.getY());
+				double qdist = Math.sqrt((objCoord.getX() - q.getX())*(objCoord.getX() - q.getX()) + (objCoord.getY() - q.getY())*(objCoord.getY() - q.getY()));
+				if (qdist <= 4 && t >= -4 && t <= lineLength + 4){
 					GUIFunctions.printf("Selected Line");
-					return sq;
-				}*/
+					selectedShape = l;
+					setChanged();
+					notifyObservers();
+					return shapeList.size()-i-1;
+				}
 			} else if(s instanceof Square){
 				Square sq = (Square)s;
-				if (Math.abs(objCoord.getX())<sq.getSize()/2+tolerance && Math.abs(objCoord.getY())<sq.getSize()/2+tolerance){
+				if (Math.abs(objCoord.getX())<sq.getSize()/2 && Math.abs(objCoord.getY())<sq.getSize()/2){
 					GUIFunctions.printf("Selected Square");
-					return sq;
+					selectedShape = sq;
+					setChanged();
+					notifyObservers();
+					return shapeList.size()-i-1;
 				}
 			} else if(s instanceof Rectangle){
 				Rectangle r = (Rectangle)s;
-				if (Math.abs(objCoord.getX())<r.getWidth()/2+tolerance && Math.abs(objCoord.getY())<r.getHeight()/2+tolerance){
+				if (Math.abs(objCoord.getX())<r.getWidth()/2 && Math.abs(objCoord.getY())<r.getHeight()/2){
 					GUIFunctions.printf("Selected Rectangle");
-					return r;
+					selectedShape = r;
+					setChanged();
+					notifyObservers();
+					return shapeList.size()-i-1;
 				}
 			} else if(s instanceof Circle){
 				Circle c = (Circle)s;
-				if (objCoord.getX()*objCoord.getX() + objCoord.getY()*objCoord.getY() < (c.getRadius()*c.getRadius())+tolerance){
+				if (objCoord.getX()*objCoord.getX() + objCoord.getY()*objCoord.getY() < (c.getRadius()*c.getRadius())){
 					GUIFunctions.printf("Selected Circle");
-					return c;
+					selectedShape = c;
+					setChanged();
+					notifyObservers();
+					return shapeList.size()-i-1;
 				}
 			}else if(s instanceof Ellipse){
 				Ellipse el = (Ellipse)s;
-				double a = el.getWidth()/2+tolerance;
-				double b = el.getHeight()/2+tolerance;
+				double a = el.getWidth()/2;
+				double b = el.getHeight()/2;
 				if ((objCoord.getX()*objCoord.getX())/(a*a) + (objCoord.getY()*objCoord.getY())/(b*b) <= 1){
 					GUIFunctions.printf("Selected Ellipse");
-					return el;
+					selectedShape = el;
+					setChanged();
+					notifyObservers();
+					return shapeList.size()-i-1;
 				}
 			}else if(s instanceof Triangle){
 				Triangle t = (Triangle)s;
@@ -146,11 +179,18 @@ public class MyModel extends CS355Drawing{
 				
 				if(a1 + a2 + a3 <= triArea) {
 					GUIFunctions.printf("Selected Triangle");
-					return t;
+					selectedShape = t;
+					setChanged();
+					notifyObservers();
+					return shapeList.size()-i-1;
 				}
-			}else{}
+			}else{
+				selectedShape = null;
+				setChanged();
+				notifyObservers();
+			}
 		}
-		return null;
+		return -1;
 	}
 	
 	public double calcArea(Point2D A, Point2D B, Point2D C) {
@@ -158,4 +198,23 @@ public class MyModel extends CS355Drawing{
 		return area/2;
 	}
 
+	public void setShape(int index, Shape s) {
+		shapeList.set(index, s);
+		setChanged();
+		notifyObservers();
+	}
+	
+	public Shape getSelectedShape() {
+		return selectedShape;
+	}
+	
+	public void setSelectedShape(int index){
+		if(index > -1){
+			selectedShape = shapeList.get(index);
+		} else {
+			selectedShape = null;
+		}
+		setChanged();
+		notifyObservers();
+	}
 }

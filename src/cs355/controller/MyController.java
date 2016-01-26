@@ -23,6 +23,8 @@ public class MyController implements CS355Controller{
 	public Point2D.Double t1;
 	public Point2D.Double t2;
 	public Point2D.Double t3;
+	public Point2D.Double diff;
+	public int selectedIndex = -1;
 
 	@Override
 	public void mouseClicked(MouseEvent e) {}
@@ -57,7 +59,11 @@ public class MyController implements CS355Controller{
 			}	
 			return;
 		}else if (button == "select"){
-			Shape selected = model.geometryTest(e.getPoint(), 4);
+			selectedIndex = model.geometryTest(e.getPoint(), 4);
+			if (selectedIndex > -1){
+				GUIFunctions.changeSelectedColor(model.getShape(selectedIndex).getColor());
+				diff.setLocation(e.getX()-model.getShape(selectedIndex).getCenter().getX(), e.getY()-model.getShape(selectedIndex).getCenter().getY());
+			}
 			return;
 		}else{
 			return;
@@ -153,8 +159,12 @@ public class MyController implements CS355Controller{
 			el.setWidth(width);
 			model.deleteShape(model.getSize()-1);
 			model.addShape(el);
-		}else{
-			
+		}else if(button == "select" && selectedIndex > -1){
+			Shape s = model.getSelectedShape();
+			Point2D.Double center = s.getCenter();
+			Point2D.Double newCenter = new Point2D.Double(center.getX() + (e.getX()-diff.getX()), center.getY() + (e.getY()-diff.getY()));
+			s.setCenter(newCenter);
+			model.setShape(selectedIndex, s);
 		}
 	}
 
@@ -164,6 +174,11 @@ public class MyController implements CS355Controller{
 	@Override
 	public void colorButtonHit(Color c) {
 		col = c;
+		if (selectedIndex > -1){
+			Shape s = model.getShape(selectedIndex);
+			s.setColor(col);
+			model.setShape(selectedIndex, s);
+		}
 		GUIFunctions.changeSelectedColor(c);
 	}
 
@@ -171,42 +186,56 @@ public class MyController implements CS355Controller{
 	public void lineButtonHit() {
 		button = "line";
 		triangleCount = 0;
+		selectedIndex = -1;
+		model.setSelectedShape(selectedIndex);
 	}
 
 	@Override
 	public void squareButtonHit() {
 		button = "square";
 		triangleCount = 0;
+		selectedIndex = -1;
+		model.setSelectedShape(selectedIndex);
 	}
 
 	@Override
 	public void rectangleButtonHit() {
 		button = "rectangle";
 		triangleCount = 0;
+		selectedIndex = -1;
+		model.setSelectedShape(selectedIndex);
 	}
 
 	@Override
 	public void circleButtonHit() {
 		button = "circle";
 		triangleCount = 0;
+		selectedIndex = -1;
+		model.setSelectedShape(selectedIndex);
 	}
 
 	@Override
 	public void ellipseButtonHit() {
 		button = "ellipse";
 		triangleCount = 0;
+		selectedIndex = -1;
+		model.setSelectedShape(selectedIndex);
 	}
 
 	@Override
 	public void triangleButtonHit() {
 		button = "triangle";
 		triangleCount = 0;
+		selectedIndex = -1;
+		model.setSelectedShape(selectedIndex);
 	}
 
 	@Override
 	public void selectButtonHit() {
 		button = "select";
 		triangleCount = 0;
+		selectedIndex = -1;
+		model.setSelectedShape(selectedIndex);
 	}
 
 	@Override
@@ -284,7 +313,10 @@ public class MyController implements CS355Controller{
 	@Override
 	public void doDeleteShape() {
 		// TODO Auto-generated method stub
-		
+		if(selectedIndex > -1){
+			model.deleteShape(selectedIndex);
+		}
+		selectedIndex = -1;
 	}
 
 	@Override
@@ -331,26 +363,37 @@ public class MyController implements CS355Controller{
 
 	@Override
 	public void doMoveForward() {
-		// TODO Auto-generated method stub
-		
+		if (selectedIndex > -1 && selectedIndex != model.getShapes().size()-1){
+			model.moveForward(selectedIndex);
+			selectedIndex++;
+		}
 	}
 
 	@Override
 	public void doMoveBackward() {
-		// TODO Auto-generated method stub
-		
+		if (selectedIndex > -1 && selectedIndex != 0){
+			model.moveBackward(selectedIndex);
+			selectedIndex--;
+		}
 	}
 
 	@Override
 	public void doSendToFront() {
 		// TODO Auto-generated method stub
-		
+		if (selectedIndex > -1){
+			model.moveToFront(selectedIndex);
+			selectedIndex = model.getShapes().size()-1;
+		}
 	}
 
 	@Override
 	public void doSendtoBack() {
 		// TODO Auto-generated method stub
-		
+		if (selectedIndex > -1){
+			model.movetoBack(selectedIndex);
+			selectedIndex = 0;
+			
+		}
 	}
 
 	public void setModel(MyModel model2) {

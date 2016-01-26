@@ -1,5 +1,6 @@
 package cs355.view;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
@@ -40,8 +41,13 @@ public class MyView implements ViewRefresher{
 			Shape s = shapeList.get(i);
 			if(s instanceof Line){
 				Line l = (Line) s;
+				Point2D.Double center = l.getCenter();
+
+				objToWorld.translate(center.getX(), center.getY());
+				objToWorld.rotate(l.getRotation());
+				toDrawOn.setTransform(objToWorld);
 				toDrawOn.setColor(l.getColor());
-				toDrawOn.drawLine((int)l.getCenter().getX(), (int)l.getCenter().getY(), (int)l.getEnd().getX(), (int)l.getEnd().getY());
+				toDrawOn.drawLine((int)0, (int)0, (int)(l.getEnd().getX()-center.getX()), (int)(l.getEnd().getY()-center.getY()));
 			} else if(s instanceof Square){
 				Square sq =(Square) s;
 				Point2D.Double center = sq.getCenter();
@@ -66,8 +72,12 @@ public class MyView implements ViewRefresher{
 			} else if(s instanceof Circle){
 				Circle c = (Circle) s;
 				Double radius = c.getRadius();
+				
+				objToWorld.translate(c.getCenter().getX(), c.getCenter().getY());
+				objToWorld.rotate(c.getRotation());
+				toDrawOn.setTransform(objToWorld);
 				toDrawOn.setColor(c.getColor());
-				toDrawOn.fillOval((int)(c.getCenter().getX() - radius), (int)(c.getCenter().getY() - radius), (int)(radius*2), (int)(radius*2));
+				toDrawOn.fillOval((int)-radius, (int)-radius, (int)(radius*2), (int)(radius*2));
 			}else if(s instanceof Ellipse){
 				Ellipse el = (Ellipse) s;
 				Point2D.Double center = el.getCenter();
@@ -92,8 +102,71 @@ public class MyView implements ViewRefresher{
 				toDrawOn.fillPolygon(x, y, 3);
 			}else{}
 		}
+		Shape selectedShape = modelUpdate.getSelectedShape();
+		if (selectedShape != null) {
+			drawHandles(selectedShape, g2d);
+		}
 	}
 
+	public void drawHandles(Shape s, Graphics2D g2d) {
+		AffineTransform objToWorld = new AffineTransform();
+		Graphics2D toDrawOn = (Graphics2D) g2d;
+
+		if(s instanceof Square){
+			Square sq =(Square) s;
+			Point2D.Double center = sq.getCenter();
+			double size = sq.getSize();
+			
+			objToWorld.translate(center.getX(), center.getY());
+			objToWorld.rotate(sq.getRotation());
+			toDrawOn.setTransform(objToWorld);
+			toDrawOn.setColor(Color.RED);
+			toDrawOn.drawRect((int)-size/2, (int)-size/2, (int)size, (int)size);
+		} else if(s instanceof Rectangle){
+			Rectangle r = (Rectangle) s;
+			Point2D.Double center = r.getCenter();
+			double width = r.getWidth();
+			double height = r.getHeight();
+			
+			objToWorld.translate(center.getX(), center.getY());
+			objToWorld.rotate(r.getRotation());
+			toDrawOn.setTransform(objToWorld);
+			toDrawOn.setColor(Color.RED);
+			toDrawOn.drawRect((int)(-width/2), (int)(-height/2), (int)width, (int)height);
+		} else if(s instanceof Circle){
+			Circle c = (Circle) s;
+			Double radius = c.getRadius();
+			
+			objToWorld.translate(c.getCenter().getX(), c.getCenter().getY());
+			objToWorld.rotate(c.getRotation());
+			toDrawOn.setTransform(objToWorld);
+			toDrawOn.setColor(Color.RED);
+			toDrawOn.drawRect((int)-radius, (int)-radius, (int)(radius*2), (int)(radius*2));
+		}else if(s instanceof Ellipse){
+			Ellipse el = (Ellipse) s;
+			Point2D.Double center = el.getCenter();
+			int w = (int)el.getWidth();
+			int h = (int)el.getHeight();
+			
+			objToWorld.translate(center.getX(), center.getY());
+			objToWorld.rotate(el.getRotation());
+			toDrawOn.setTransform(objToWorld);
+			toDrawOn.setColor(Color.RED);
+			toDrawOn.drawRect((int)-w/2, (int)-h/2, w, h);
+		}else if(s instanceof Triangle){
+			Triangle t = (Triangle) s;
+			Point2D.Double center = t.getCenter();
+			int[] x = {(int)(t.getA().x-center.getX()),(int)(t.getB().x-center.getX()),(int)(t.getC().x-center.getX())};
+			int[] y = {(int)(t.getA().y-center.getY()),(int)(t.getB().y-center.getY()),(int)(t.getC().y-center.getY())};
+			
+			objToWorld.translate(center.getX(), center.getY());
+			objToWorld.rotate(t.getRotation());
+			toDrawOn.setTransform(objToWorld);
+			toDrawOn.setColor(Color.RED);
+			toDrawOn.drawPolygon(x, y, 3);
+		}else{}
+	}
+	
 	public void setModel(MyModel model) {
 		modelUpdate = model;
 		modelUpdate.addObserver(this);
