@@ -62,7 +62,9 @@ public class MyController implements CS355Controller{
 			selectedIndex = model.geometryTest(e.getPoint(), 4);
 			if (selectedIndex > -1){
 				GUIFunctions.changeSelectedColor(model.getShape(selectedIndex).getColor());
-				diff.setLocation(e.getX()-model.getShape(selectedIndex).getCenter().getX(), e.getY()-model.getShape(selectedIndex).getCenter().getY());
+				diff = new Point2D.Double(e.getX()-model.getShape(selectedIndex).getCenter().getX(), e.getY()-model.getShape(selectedIndex).getCenter().getY());
+			} else {
+				model.setSelectedShape(selectedIndex);
 			}
 			return;
 		}else{
@@ -161,10 +163,28 @@ public class MyController implements CS355Controller{
 			model.addShape(el);
 		}else if(button == "select" && selectedIndex > -1){
 			Shape s = model.getSelectedShape();
-			Point2D.Double center = s.getCenter();
-			Point2D.Double newCenter = new Point2D.Double(center.getX() + (e.getX()-diff.getX()), center.getY() + (e.getY()-diff.getY()));
-			s.setCenter(newCenter);
-			model.setShape(selectedIndex, s);
+			
+			//TODO Not Working as intended
+			if(model.doHandleCheck(e.getPoint())) {
+				double theta = Math.toRadians(Math.atan(e.getPoint().getX()/e.getPoint().getY()));
+				s.setRotation(theta);
+				model.setShape(selectedIndex, s);
+				model.setSelectedShape(selectedIndex);
+				GUIFunctions.printf("" + theta);
+			} else {
+				Point2D.Double newCenter = new Point2D.Double((e.getX()-diff.getX()), (e.getY()-diff.getY()));
+			
+				if(s instanceof Triangle) {
+					Triangle t = (Triangle)s;
+					Point2D.Double change = new Point2D.Double(newCenter.getX() - s.getCenter().getX(), newCenter.getY() - s.getCenter().getY());
+					t.setA(new Point2D.Double(t.getA().getX()+change.getX(),t.getA().getY()+change.getY()));
+					t.setB(new Point2D.Double(t.getB().getX()+change.getX(),t.getB().getY()+change.getY()));
+					t.setC(new Point2D.Double(t.getC().getX()+change.getX(),t.getC().getY()+change.getY()));
+					s = t;
+				}
+				s.setCenter(newCenter);
+				model.setShape(selectedIndex, s);
+			}
 		}
 	}
 
@@ -317,6 +337,7 @@ public class MyController implements CS355Controller{
 			model.deleteShape(selectedIndex);
 		}
 		selectedIndex = -1;
+		model.setSelectedShape(selectedIndex);
 	}
 
 	@Override

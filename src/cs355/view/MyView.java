@@ -122,6 +122,11 @@ public class MyView implements ViewRefresher{
 			toDrawOn.setTransform(objToWorld);
 			toDrawOn.setColor(Color.RED);
 			toDrawOn.drawRect((int)-size/2, (int)-size/2, (int)size, (int)size);
+			
+			double c = size/2 + 20;
+			double x = c * Math.sin(sq.getRotation());
+			double y = c * Math.cos(sq.getRotation());
+			toDrawOn.drawOval((int)-(x+5), (int)-(y+5), 10, 10);
 		} else if(s instanceof Rectangle){
 			Rectangle r = (Rectangle) s;
 			Point2D.Double center = r.getCenter();
@@ -133,6 +138,11 @@ public class MyView implements ViewRefresher{
 			toDrawOn.setTransform(objToWorld);
 			toDrawOn.setColor(Color.RED);
 			toDrawOn.drawRect((int)(-width/2), (int)(-height/2), (int)width, (int)height);
+			
+			double c = height/2 + 20;
+			double x = c * Math.sin(r.getRotation());
+			double y = c * Math.cos(r.getRotation());
+			toDrawOn.drawOval((int)-(x+5), (int)-(y+5), 10, 10);
 		} else if(s instanceof Circle){
 			Circle c = (Circle) s;
 			Double radius = c.getRadius();
@@ -153,17 +163,31 @@ public class MyView implements ViewRefresher{
 			toDrawOn.setTransform(objToWorld);
 			toDrawOn.setColor(Color.RED);
 			toDrawOn.drawRect((int)-w/2, (int)-h/2, w, h);
+			
+			double c = h/2 + 20;
+			double x = c * Math.sin(el.getRotation());
+			double y = c * Math.cos(el.getRotation());
+			toDrawOn.drawOval((int)-(x+5), (int)-(y+5), 10, 10);
 		}else if(s instanceof Triangle){
 			Triangle t = (Triangle) s;
 			Point2D.Double center = t.getCenter();
-			int[] x = {(int)(t.getA().x-center.getX()),(int)(t.getB().x-center.getX()),(int)(t.getC().x-center.getX())};
-			int[] y = {(int)(t.getA().y-center.getY()),(int)(t.getB().y-center.getY()),(int)(t.getC().y-center.getY())};
+			int[] xc = {(int)(t.getA().x-center.getX()),(int)(t.getB().x-center.getX()),(int)(t.getC().x-center.getX())};
+			int[] yc = {(int)(t.getA().y-center.getY()),(int)(t.getB().y-center.getY()),(int)(t.getC().y-center.getY())};
 			
 			objToWorld.translate(center.getX(), center.getY());
 			objToWorld.rotate(t.getRotation());
 			toDrawOn.setTransform(objToWorld);
 			toDrawOn.setColor(Color.RED);
-			toDrawOn.drawPolygon(x, y, 3);
+			toDrawOn.drawPolygon(xc, yc, 3);
+			
+			double lca = Math.sqrt(Math.pow((t.getCenter().getX() - t.getA().getX()), 2) + Math.pow((t.getCenter().getY() - t.getA().getY()), 2));
+			double lcb = Math.sqrt(Math.pow((t.getCenter().getX() - t.getB().getX()), 2) + Math.pow((t.getCenter().getY() - t.getB().getY()), 2));
+			double lcc = Math.sqrt(Math.pow((t.getCenter().getX() - t.getC().getX()), 2) + Math.pow((t.getCenter().getY() - t.getC().getY()), 2));
+
+			double c = Math.max(lca, Math.max(lcb,lcc));
+			double x = c * Math.sin(t.getRotation());
+			double y = c * Math.cos(t.getRotation());
+			toDrawOn.drawOval((int)-(x+5), (int)-(y+5), 10, 10);
 		}else{}
 	}
 	

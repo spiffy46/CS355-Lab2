@@ -12,6 +12,7 @@ public class MyModel extends CS355Drawing{
 
 	List<Shape> shapeList = new ArrayList<Shape>();
 	Shape selectedShape;
+	int selectedIndex;
 	
 	@Override
 	public Shape getShape(int index) {
@@ -97,9 +98,37 @@ public class MyModel extends CS355Drawing{
 		return shapeList.size();
 	}
 	
+	public boolean doHandleCheck(Point2D worldCoord) {
+		Point2D.Double objCoord = new Point2D.Double();
+		AffineTransform worldToObj = new AffineTransform();
+		worldToObj.rotate(-selectedShape.getRotation());
+	
+		if(selectedShape instanceof Square){
+			Square s = (Square)selectedShape;
+			double c = s.getSize()/2 + 20;
+			double x = c * Math.sin(s.getRotation());
+			double y = c * Math.cos(s.getRotation());
+			
+			worldToObj.translate(-(selectedShape.getCenter().getX()-x), -(selectedShape.getCenter().getY()-y));
+			worldToObj.transform(worldCoord, objCoord);
+			
+			if (objCoord.getX()*objCoord.getX() + objCoord.getY()*objCoord.getY() < (100)){
+				GUIFunctions.printf("Found Handle");
+				return true;
+			} 
+		}
+		return false;
+	}
+	
 	public int geometryTest(Point2D worldCoord, int tolerance) {
 		Point2D.Double objCoord = new Point2D.Double();
 		List<Shape> reversed = getShapesReversed();
+		
+		if(selectedShape != null) {
+			if(doHandleCheck(worldCoord)) {
+				return selectedIndex;
+			}
+		}
 		
 		for(int i = 0; i < reversed.size(); i++){
 			AffineTransform worldToObj = new AffineTransform();
@@ -124,36 +153,40 @@ public class MyModel extends CS355Drawing{
 				if (qdist <= 4 && t >= -4 && t <= lineLength + 4){
 					GUIFunctions.printf("Selected Line");
 					selectedShape = l;
+					selectedIndex = shapeList.size()-i-1;
 					setChanged();
 					notifyObservers();
-					return shapeList.size()-i-1;
+					return selectedIndex;
 				}
 			} else if(s instanceof Square){
 				Square sq = (Square)s;
 				if (Math.abs(objCoord.getX())<sq.getSize()/2 && Math.abs(objCoord.getY())<sq.getSize()/2){
-					GUIFunctions.printf("Selected Square");
+					GUIFunctions.printf("Center: " + sq.getCenter().getX() + "," + sq.getCenter().getY() + " Rotation: " + sq.getRotation());
 					selectedShape = sq;
+					selectedIndex = shapeList.size()-i-1;
 					setChanged();
 					notifyObservers();
-					return shapeList.size()-i-1;
+					return selectedIndex;
 				}
 			} else if(s instanceof Rectangle){
 				Rectangle r = (Rectangle)s;
 				if (Math.abs(objCoord.getX())<r.getWidth()/2 && Math.abs(objCoord.getY())<r.getHeight()/2){
 					GUIFunctions.printf("Selected Rectangle");
 					selectedShape = r;
+					selectedIndex = shapeList.size()-i-1;
 					setChanged();
 					notifyObservers();
-					return shapeList.size()-i-1;
+					return selectedIndex;
 				}
 			} else if(s instanceof Circle){
 				Circle c = (Circle)s;
 				if (objCoord.getX()*objCoord.getX() + objCoord.getY()*objCoord.getY() < (c.getRadius()*c.getRadius())){
 					GUIFunctions.printf("Selected Circle");
 					selectedShape = c;
+					selectedIndex = shapeList.size()-i-1;
 					setChanged();
 					notifyObservers();
-					return shapeList.size()-i-1;
+					return selectedIndex;
 				}
 			}else if(s instanceof Ellipse){
 				Ellipse el = (Ellipse)s;
@@ -162,9 +195,10 @@ public class MyModel extends CS355Drawing{
 				if ((objCoord.getX()*objCoord.getX())/(a*a) + (objCoord.getY()*objCoord.getY())/(b*b) <= 1){
 					GUIFunctions.printf("Selected Ellipse");
 					selectedShape = el;
+					selectedIndex = shapeList.size()-i-1;
 					setChanged();
 					notifyObservers();
-					return shapeList.size()-i-1;
+					return selectedIndex;
 				}
 			}else if(s instanceof Triangle){
 				Triangle t = (Triangle)s;
@@ -180,9 +214,10 @@ public class MyModel extends CS355Drawing{
 				if(a1 + a2 + a3 <= triArea) {
 					GUIFunctions.printf("Selected Triangle");
 					selectedShape = t;
+					selectedIndex = shapeList.size()-i-1;
 					setChanged();
 					notifyObservers();
-					return shapeList.size()-i-1;
+					return selectedIndex;
 				}
 			}else{
 				selectedShape = null;
