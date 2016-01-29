@@ -124,9 +124,7 @@ public class MyView implements ViewRefresher{
 			toDrawOn.drawRect((int)-size/2, (int)-size/2, (int)size, (int)size);
 			
 			double c = size/2 + 20;
-			double x = c * Math.sin(sq.getRotation());
-			double y = c * Math.cos(sq.getRotation());
-			toDrawOn.drawOval((int)-(x+5), (int)-(y+5), 10, 10);
+			toDrawOn.drawOval((int)-5, (int)-(c+5), 10, 10);
 		} else if(s instanceof Rectangle){
 			Rectangle r = (Rectangle) s;
 			Point2D.Double center = r.getCenter();

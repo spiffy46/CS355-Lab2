@@ -136,7 +136,6 @@ public class MyModel extends CS355Drawing{
 			worldToObj.rotate(-s.getRotation());
 			worldToObj.translate(-s.getCenter().getX(), -s.getCenter().getY());
 			worldToObj.transform(worldCoord, objCoord);
-			GUIFunctions.printf(objCoord.toString());
 			if(s instanceof Line){
 				Line l = (Line)s;
 				Point2D.Double d = new Point2D.Double();

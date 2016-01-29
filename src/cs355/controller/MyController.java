@@ -2,6 +2,7 @@ package cs355.controller;
 
 import java.awt.Color;
 import java.awt.event.MouseEvent;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.io.File;
 import java.util.Iterator;
@@ -25,6 +26,7 @@ public class MyController implements CS355Controller{
 	public Point2D.Double t3;
 	public Point2D.Double diff;
 	public int selectedIndex = -1;
+	public boolean handleSelected = false;
 
 	@Override
 	public void mouseClicked(MouseEvent e) {}
@@ -63,6 +65,9 @@ public class MyController implements CS355Controller{
 			if (selectedIndex > -1){
 				GUIFunctions.changeSelectedColor(model.getShape(selectedIndex).getColor());
 				diff = new Point2D.Double(e.getX()-model.getShape(selectedIndex).getCenter().getX(), e.getY()-model.getShape(selectedIndex).getCenter().getY());
+				if(model.doHandleCheck(e.getPoint())){
+					handleSelected = true;
+				}
 			} else {
 				model.setSelectedShape(selectedIndex);
 			}
@@ -74,7 +79,9 @@ public class MyController implements CS355Controller{
 	}
 
 	@Override
-	public void mouseReleased(MouseEvent e) {}
+	public void mouseReleased(MouseEvent e) {
+		handleSelected = false;
+	}
 
 	@Override
 	public void mouseEntered(MouseEvent e) {}
@@ -164,13 +171,20 @@ public class MyController implements CS355Controller{
 		}else if(button == "select" && selectedIndex > -1){
 			Shape s = model.getSelectedShape();
 			
-			//TODO Not Working as intended
-			if(model.doHandleCheck(e.getPoint())) {
-				double theta = Math.toRadians(Math.atan(e.getPoint().getX()/e.getPoint().getY()));
+			//TODO Cant find the handle again after a rotation
+			if(handleSelected) {
+				AffineTransform worldToObj = new AffineTransform();
+				Point2D.Double objCoord = new Point2D.Double();
+				worldToObj.translate(-s.getCenter().getX(), -s.getCenter().getY());
+				worldToObj.transform(e.getPoint(), objCoord);
+				double theta = Math.acos(-objCoord.getY()/Math.sqrt(Math.pow(objCoord.getX(), 2) + Math.pow(-objCoord.getY(), 2)));
+				if(objCoord.getX() < 0){
+					theta = -theta;
+				}
 				s.setRotation(theta);
+				GUIFunctions.printf("X: " + (int)objCoord.getX() + " Y: " + -(int)objCoord.getY());
 				model.setShape(selectedIndex, s);
 				model.setSelectedShape(selectedIndex);
-				GUIFunctions.printf("" + theta);
 			} else {
 				Point2D.Double newCenter = new Point2D.Double((e.getX()-diff.getX()), (e.getY()-diff.getY()));
 			
@@ -184,6 +198,7 @@ public class MyController implements CS355Controller{
 				}
 				s.setCenter(newCenter);
 				model.setShape(selectedIndex, s);
+				GUIFunctions.printf("Inside wrong 'else'");
 			}
 		}
 	}
