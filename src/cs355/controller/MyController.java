@@ -182,7 +182,6 @@ public class MyController implements CS355Controller{
 					theta = -theta;
 				}
 				s.setRotation(theta);
-				GUIFunctions.printf("X: " + (int)objCoord.getX() + " Y: " + -(int)objCoord.getY());
 				model.setShape(selectedIndex, s);
 				model.setSelectedShape(selectedIndex);
 			} else {
@@ -198,7 +197,6 @@ public class MyController implements CS355Controller{
 				}
 				s.setCenter(newCenter);
 				model.setShape(selectedIndex, s);
-				GUIFunctions.printf("Inside wrong 'else'");
 			}
 		}
 	}

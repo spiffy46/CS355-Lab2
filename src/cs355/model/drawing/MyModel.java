@@ -106,14 +106,41 @@ public class MyModel extends CS355Drawing{
 		if(selectedShape instanceof Square){
 			Square s = (Square)selectedShape;
 			double c = s.getSize()/2 + 20;
-			double x = c * Math.sin(s.getRotation());
-			double y = c * Math.cos(s.getRotation());
 			
-			worldToObj.translate(-(selectedShape.getCenter().getX()-x), -(selectedShape.getCenter().getY()-y));
+			worldToObj.translate(-s.getCenter().getX(), -(s.getCenter().getY()));
 			worldToObj.transform(worldCoord, objCoord);
+			if (objCoord.getX()*objCoord.getX() + (objCoord.getY()+c)*(objCoord.getY()+c) < (100)){
+				return true;
+			} 
+		} else if (selectedShape instanceof Rectangle) {
+			Rectangle s = (Rectangle)selectedShape;
+			double c = s.getHeight()/2 + 20;
 			
-			if (objCoord.getX()*objCoord.getX() + objCoord.getY()*objCoord.getY() < (100)){
-				GUIFunctions.printf("Found Handle");
+			worldToObj.translate(-s.getCenter().getX(), -(s.getCenter().getY()));
+			worldToObj.transform(worldCoord, objCoord);
+			if (objCoord.getX()*objCoord.getX() + (objCoord.getY()+c)*(objCoord.getY()+c) < (100)){
+				return true;
+			} 
+		} else if (selectedShape instanceof Ellipse) {
+			Ellipse s = (Ellipse)selectedShape;
+			double c = s.getHeight()/2 + 20;
+			
+			worldToObj.translate(-s.getCenter().getX(), -(s.getCenter().getY()));
+			worldToObj.transform(worldCoord, objCoord);
+			if (objCoord.getX()*objCoord.getX() + (objCoord.getY()+c)*(objCoord.getY()+c) < (100)){
+				return true;
+			} 
+		} else if (selectedShape instanceof Triangle) {
+			Triangle s = (Triangle)selectedShape;
+			double lca = Math.sqrt(Math.pow((s.getCenter().getX() - s.getA().getX()), 2) + Math.pow((s.getCenter().getY() - s.getA().getY()), 2));
+			double lcb = Math.sqrt(Math.pow((s.getCenter().getX() - s.getB().getX()), 2) + Math.pow((s.getCenter().getY() - s.getB().getY()), 2));
+			double lcc = Math.sqrt(Math.pow((s.getCenter().getX() - s.getC().getX()), 2) + Math.pow((s.getCenter().getY() - s.getC().getY()), 2));
+
+			double c = Math.max(lca, Math.max(lcb,lcc));	
+			
+			worldToObj.translate(-s.getCenter().getX(), -(s.getCenter().getY()));
+			worldToObj.transform(worldCoord, objCoord);
+			if (objCoord.getX()*objCoord.getX() + (objCoord.getY()+c)*(objCoord.getY()+c) < (100)){
 				return true;
 			} 
 		}
@@ -160,7 +187,6 @@ public class MyModel extends CS355Drawing{
 			} else if(s instanceof Square){
 				Square sq = (Square)s;
 				if (Math.abs(objCoord.getX())<sq.getSize()/2 && Math.abs(objCoord.getY())<sq.getSize()/2){
-					GUIFunctions.printf("Center: " + sq.getCenter().getX() + "," + sq.getCenter().getY() + " Rotation: " + sq.getRotation());
 					selectedShape = sq;
 					selectedIndex = shapeList.size()-i-1;
 					setChanged();
@@ -170,7 +196,6 @@ public class MyModel extends CS355Drawing{
 			} else if(s instanceof Rectangle){
 				Rectangle r = (Rectangle)s;
 				if (Math.abs(objCoord.getX())<r.getWidth()/2 && Math.abs(objCoord.getY())<r.getHeight()/2){
-					GUIFunctions.printf("Selected Rectangle");
 					selectedShape = r;
 					selectedIndex = shapeList.size()-i-1;
 					setChanged();
@@ -180,7 +205,6 @@ public class MyModel extends CS355Drawing{
 			} else if(s instanceof Circle){
 				Circle c = (Circle)s;
 				if (objCoord.getX()*objCoord.getX() + objCoord.getY()*objCoord.getY() < (c.getRadius()*c.getRadius())){
-					GUIFunctions.printf("Selected Circle");
 					selectedShape = c;
 					selectedIndex = shapeList.size()-i-1;
 					setChanged();
@@ -192,7 +216,6 @@ public class MyModel extends CS355Drawing{
 				double a = el.getWidth()/2;
 				double b = el.getHeight()/2;
 				if ((objCoord.getX()*objCoord.getX())/(a*a) + (objCoord.getY()*objCoord.getY())/(b*b) <= 1){
-					GUIFunctions.printf("Selected Ellipse");
 					selectedShape = el;
 					selectedIndex = shapeList.size()-i-1;
 					setChanged();
@@ -211,7 +234,6 @@ public class MyModel extends CS355Drawing{
 				double a3 = calcArea(objCoord,a,b);
 				
 				if(a1 + a2 + a3 <= triArea) {
-					GUIFunctions.printf("Selected Triangle");
 					selectedShape = t;
 					selectedIndex = shapeList.size()-i-1;
 					setChanged();

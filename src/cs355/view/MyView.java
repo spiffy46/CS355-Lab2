@@ -112,6 +112,8 @@ public class MyView implements ViewRefresher{
 		AffineTransform objToWorld = new AffineTransform();
 		Graphics2D toDrawOn = (Graphics2D) g2d;
 
+		//TODO Need to handle line case
+		
 		if(s instanceof Square){
 			Square sq =(Square) s;
 			Point2D.Double center = sq.getCenter();
@@ -138,9 +140,7 @@ public class MyView implements ViewRefresher{
 			toDrawOn.drawRect((int)(-width/2), (int)(-height/2), (int)width, (int)height);
 			
 			double c = height/2 + 20;
-			double x = c * Math.sin(r.getRotation());
-			double y = c * Math.cos(r.getRotation());
-			toDrawOn.drawOval((int)-(x+5), (int)-(y+5), 10, 10);
+			toDrawOn.drawOval((int)-5, (int)-(c+5), 10, 10);
 		} else if(s instanceof Circle){
 			Circle c = (Circle) s;
 			Double radius = c.getRadius();
@@ -163,9 +163,7 @@ public class MyView implements ViewRefresher{
 			toDrawOn.drawRect((int)-w/2, (int)-h/2, w, h);
 			
 			double c = h/2 + 20;
-			double x = c * Math.sin(el.getRotation());
-			double y = c * Math.cos(el.getRotation());
-			toDrawOn.drawOval((int)-(x+5), (int)-(y+5), 10, 10);
+			toDrawOn.drawOval((int)-5, (int)-(c+5), 10, 10);
 		}else if(s instanceof Triangle){
 			Triangle t = (Triangle) s;
 			Point2D.Double center = t.getCenter();
@@ -183,9 +181,7 @@ public class MyView implements ViewRefresher{
 			double lcc = Math.sqrt(Math.pow((t.getCenter().getX() - t.getC().getX()), 2) + Math.pow((t.getCenter().getY() - t.getC().getY()), 2));
 
 			double c = Math.max(lca, Math.max(lcb,lcc));
-			double x = c * Math.sin(t.getRotation());
-			double y = c * Math.cos(t.getRotation());
-			toDrawOn.drawOval((int)-(x+5), (int)-(y+5), 10, 10);
+			toDrawOn.drawOval((int)-5, (int)-(c+5), 10, 10);
 		}else{}
 	}
 	
