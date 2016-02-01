@@ -113,8 +113,17 @@ public class MyView implements ViewRefresher{
 		Graphics2D toDrawOn = (Graphics2D) g2d;
 
 		//TODO Need to handle line case
-		
-		if(s instanceof Square){
+		if(s instanceof Line){
+			Line l = (Line) s;
+			Point2D.Double center = l.getCenter();
+			Point2D.Double end = l.getEnd();
+			objToWorld.translate(center.getX(), center.getY());
+			toDrawOn.setTransform(objToWorld);
+			toDrawOn.setColor(Color.RED);
+			
+			toDrawOn.drawOval(-5, -5, 10, 10);
+			toDrawOn.drawOval((int)(end.getX()-center.getX())-5,(int)(end.getY()-center.getY())-5,10,10);
+		}else if(s instanceof Square){
 			Square sq =(Square) s;
 			Point2D.Double center = sq.getCenter();
 			double size = sq.getSize();

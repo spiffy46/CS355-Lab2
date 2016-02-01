@@ -103,7 +103,19 @@ public class MyModel extends CS355Drawing{
 		AffineTransform worldToObj = new AffineTransform();
 		worldToObj.rotate(-selectedShape.getRotation());
 	
-		if(selectedShape instanceof Square){
+		if(selectedShape instanceof Line){
+			Line s = (Line) selectedShape;
+			
+			Point2D.Double len = new Point2D.Double(s.getEnd().getX() - s.getCenter().getX(), s.getEnd().getY() - s.getCenter().getY());
+			
+			worldToObj.translate(-s.getCenter().getX(), -(s.getCenter().getY()));
+			worldToObj.transform(worldCoord, objCoord);
+			if (objCoord.getX()*objCoord.getX() + objCoord.getY()*objCoord.getY() < 100){
+				return true;
+			} else if((objCoord.getX()-len.getX())*(objCoord.getX()-len.getX()) + (objCoord.getY()-len.getY())*(objCoord.getY()-len.getY()) < 100){
+				return true;
+			}
+		}else if(selectedShape instanceof Square){
 			Square s = (Square)selectedShape;
 			double c = s.getSize()/2 + 20;
 			

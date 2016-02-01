@@ -171,23 +171,47 @@ public class MyController implements CS355Controller{
 		}else if(button == "select" && selectedIndex > -1){
 			Shape s = model.getSelectedShape();
 			
-			//TODO Cant find the handle again after a rotation
 			if(handleSelected) {
 				AffineTransform worldToObj = new AffineTransform();
 				Point2D.Double objCoord = new Point2D.Double();
 				worldToObj.translate(-s.getCenter().getX(), -s.getCenter().getY());
 				worldToObj.transform(e.getPoint(), objCoord);
-				double theta = Math.acos(-objCoord.getY()/Math.sqrt(Math.pow(objCoord.getX(), 2) + Math.pow(-objCoord.getY(), 2)));
-				if(objCoord.getX() < 0){
-					theta = -theta;
+				
+				if(s instanceof Line){
+					Line l = (Line)s;
+					Point2D.Double len = new Point2D.Double(l.getEnd().getX() - l.getCenter().getX(), l.getEnd().getY() - l.getCenter().getY());
+
+					if (objCoord.getX()*objCoord.getX() + objCoord.getY()*objCoord.getY() < 100){
+						Point2D.Double newCenter = new Point2D.Double(e.getX(), e.getY());
+						l.setCenter(newCenter);
+					} else if((objCoord.getX()-len.getX())*(objCoord.getX()-len.getX()) + (objCoord.getY()-len.getY())*(objCoord.getY()-len.getY()) < 100){
+						Point2D.Double newEnd = new Point2D.Double(e.getX(), e.getY());
+						l.setEnd(newEnd);
+					}
+					s = l;
+					model.setShape(selectedIndex, s);
+					model.setSelectedShape(selectedIndex);
+				}else{
+					
+					double theta = Math.acos(-objCoord.getY()/Math.sqrt(Math.pow(objCoord.getX(), 2) + Math.pow(-objCoord.getY(), 2)));
+					if(objCoord.getX() < 0){
+						theta = -theta;
+					}
+					s.setRotation(theta);
+					model.setShape(selectedIndex, s);
+					model.setSelectedShape(selectedIndex);
 				}
-				s.setRotation(theta);
-				model.setShape(selectedIndex, s);
-				model.setSelectedShape(selectedIndex);
 			} else {
 				Point2D.Double newCenter = new Point2D.Double((e.getX()-diff.getX()), (e.getY()-diff.getY()));
 			
-				if(s instanceof Triangle) {
+				if(s instanceof Line) {
+					Line l = (Line)s;
+					Point2D.Double len = new Point2D.Double(l.getEnd().getX() - l.getCenter().getX(), l.getEnd().getY() - l.getCenter().getY());
+					GUIFunctions.printf("Len: " + (int)len.getX() + "," + (int)len.getY());
+					Point2D.Double newEnd = new Point2D.Double((newCenter.getX()+len.getX()), (newCenter.getY()+len.getY()));
+					l.setEnd(newEnd);
+					s = l;
+				}else if(s instanceof Triangle) {
 					Triangle t = (Triangle)s;
 					Point2D.Double change = new Point2D.Double(newCenter.getX() - s.getCenter().getX(), newCenter.getY() - s.getCenter().getY());
 					t.setA(new Point2D.Double(t.getA().getX()+change.getX(),t.getA().getY()+change.getY()));
