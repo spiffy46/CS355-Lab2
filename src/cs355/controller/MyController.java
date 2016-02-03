@@ -27,6 +27,7 @@ public class MyController implements CS355Controller{
 	public Point2D.Double diff;
 	public int selectedIndex = -1;
 	public boolean handleSelected = false;
+	public int lineHandleSelected = 0;
 
 	@Override
 	public void mouseClicked(MouseEvent e) {}
@@ -63,10 +64,26 @@ public class MyController implements CS355Controller{
 		}else if (button == "select"){
 			selectedIndex = model.geometryTest(e.getPoint(), 4);
 			if (selectedIndex > -1){
-				GUIFunctions.changeSelectedColor(model.getShape(selectedIndex).getColor());
-				diff = new Point2D.Double(e.getX()-model.getShape(selectedIndex).getCenter().getX(), e.getY()-model.getShape(selectedIndex).getCenter().getY());
+				Shape s = model.getShape(selectedIndex);
+				GUIFunctions.changeSelectedColor(s.getColor());
+				diff = new Point2D.Double(e.getX()-s.getCenter().getX(), e.getY()-s.getCenter().getY());
 				if(model.doHandleCheck(e.getPoint())){
 					handleSelected = true;
+					if(s instanceof Line){
+						Line l = (Line)s;
+						Point2D.Double len = new Point2D.Double(l.getEnd().getX() - l.getCenter().getX(), l.getEnd().getY() - l.getCenter().getY());
+
+						AffineTransform worldToObj = new AffineTransform();
+						Point2D.Double objCoord = new Point2D.Double();
+						worldToObj.translate(-s.getCenter().getX(), -s.getCenter().getY());
+						worldToObj.transform(e.getPoint(), objCoord);
+						
+						if (objCoord.getX()*objCoord.getX() + objCoord.getY()*objCoord.getY() < 100){
+							lineHandleSelected = 1;
+						} else if((objCoord.getX()-len.getX())*(objCoord.getX()-len.getX()) + (objCoord.getY()-len.getY())*(objCoord.getY()-len.getY()) < 100){
+							lineHandleSelected = 2;
+						}
+					}
 				}
 			} else {
 				model.setSelectedShape(selectedIndex);
@@ -81,6 +98,7 @@ public class MyController implements CS355Controller{
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		handleSelected = false;
+		lineHandleSelected = 0;
 	}
 
 	@Override
@@ -179,12 +197,11 @@ public class MyController implements CS355Controller{
 				
 				if(s instanceof Line){
 					Line l = (Line)s;
-					Point2D.Double len = new Point2D.Double(l.getEnd().getX() - l.getCenter().getX(), l.getEnd().getY() - l.getCenter().getY());
 
-					if (objCoord.getX()*objCoord.getX() + objCoord.getY()*objCoord.getY() < 100){
+					if (lineHandleSelected == 1){
 						Point2D.Double newCenter = new Point2D.Double(e.getX(), e.getY());
 						l.setCenter(newCenter);
-					} else if((objCoord.getX()-len.getX())*(objCoord.getX()-len.getX()) + (objCoord.getY()-len.getY())*(objCoord.getY()-len.getY()) < 100){
+					} else if(lineHandleSelected == 2){
 						Point2D.Double newEnd = new Point2D.Double(e.getX(), e.getY());
 						l.setEnd(newEnd);
 					}
