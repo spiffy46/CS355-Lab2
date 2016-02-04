@@ -29,6 +29,14 @@ public class MyController implements CS355Controller{
 	public boolean handleSelected = false;
 	public int lineHandleSelected = 0;
 
+	public void init() {
+		triangleCount = 0;
+		selectedIndex = -1;
+		handleSelected = false;
+		col = Color.white;
+		lineHandleSelected = 0;
+		button = "";
+	}
 	@Override
 	public void mouseClicked(MouseEvent e) {}
 
@@ -85,9 +93,7 @@ public class MyController implements CS355Controller{
 						}
 					}
 				}
-			} else {
-				model.setSelectedShape(selectedIndex);
-			}
+			} 
 			return;
 		}else{
 			return;
@@ -130,8 +136,7 @@ public class MyController implements CS355Controller{
 			}else{
 				upLeft.setLocation(p1.getX()-size, p1.getY()-size);
 			}
-			Point2D.Double center = new Point2D.Double();
-			center.setLocation(upLeft.getX()+size/2, upLeft.getY()+size/2);
+			Point2D.Double center = new Point2D.Double(upLeft.getX()+size/2, upLeft.getY()+size/2);
 			currentShape = model.getShape(model.getSize()-1);
 			Square s = (Square)currentShape;
 			s.setCenter(center);
@@ -145,8 +150,7 @@ public class MyController implements CS355Controller{
 			Double height = Math.abs(p1.getY() - p2.getY());
 			currentShape = model.getShape(model.getSize()-1);
 			Rectangle r = (Rectangle)currentShape;
-			Point2D.Double center = new Point2D.Double();
-			center.setLocation(upLeft.getX()+width/2, upLeft.getY()+height/2);
+			Point2D.Double center = new Point2D.Double(upLeft.getX()+width/2, upLeft.getY()+height/2);
 			r.setHeight(height);
 			r.setWidth(width);
 			r.setCenter(center);
@@ -166,8 +170,7 @@ public class MyController implements CS355Controller{
 			}else{
 				upLeft.setLocation(p1.getX()-size, p1.getY()-size);
 			}
-			Point2D.Double center = new Point2D.Double();
-			center.setLocation(upLeft.getX()+radius, upLeft.getY()+radius);
+			Point2D.Double center = new Point2D.Double(upLeft.getX()+radius, upLeft.getY()+radius);
 			currentShape = model.getShape(model.getSize()-1);
 			Circle c = (Circle)currentShape;
 			c.setCenter(center);
@@ -175,8 +178,7 @@ public class MyController implements CS355Controller{
 			model.deleteShape(model.getSize()-1);
 			model.addShape(c);
 		}else if(button == "ellipse"){
-			Point2D.Double center = new Point2D.Double();
-			center.setLocation((p1.getX() + p2.getX())/2, (p1.getY() + p2.getY())/2);
+			Point2D.Double center = new Point2D.Double((p1.getX() + p2.getX())/2, (p1.getY() + p2.getY())/2);
 			Double width = Math.abs(p1.getX() - p2.getX());
 			Double height = Math.abs(p1.getY() - p2.getY());
 			currentShape = model.getShape(model.getSize()-1);
@@ -380,6 +382,7 @@ public class MyController implements CS355Controller{
 
 	@Override
 	public void openDrawing(File file) {
+		init();
 		model.open(file);
 	}
 

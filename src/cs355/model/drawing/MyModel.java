@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import cs355.GUIFunctions;
-
 public class MyModel extends CS355Drawing{
 
 	List<Shape> shapeList = new ArrayList<Shape>();
@@ -102,14 +100,14 @@ public class MyModel extends CS355Drawing{
 		Point2D.Double objCoord = new Point2D.Double();
 		AffineTransform worldToObj = new AffineTransform();
 		worldToObj.rotate(-selectedShape.getRotation());
+		worldToObj.translate(-selectedShape.getCenter().getX(), -(selectedShape.getCenter().getY()));
+		worldToObj.transform(worldCoord, objCoord);
 	
 		if(selectedShape instanceof Line){
 			Line s = (Line) selectedShape;
 			
 			Point2D.Double len = new Point2D.Double(s.getEnd().getX() - s.getCenter().getX(), s.getEnd().getY() - s.getCenter().getY());
 			
-			worldToObj.translate(-s.getCenter().getX(), -(s.getCenter().getY()));
-			worldToObj.transform(worldCoord, objCoord);
 			if (objCoord.getX()*objCoord.getX() + objCoord.getY()*objCoord.getY() < 100){
 				return true;
 			} else if((objCoord.getX()-len.getX())*(objCoord.getX()-len.getX()) + (objCoord.getY()-len.getY())*(objCoord.getY()-len.getY()) < 100){
@@ -119,8 +117,6 @@ public class MyModel extends CS355Drawing{
 			Square s = (Square)selectedShape;
 			double c = s.getSize()/2 + 20;
 			
-			worldToObj.translate(-s.getCenter().getX(), -(s.getCenter().getY()));
-			worldToObj.transform(worldCoord, objCoord);
 			if (objCoord.getX()*objCoord.getX() + (objCoord.getY()+c)*(objCoord.getY()+c) < (100)){
 				return true;
 			} 
@@ -128,8 +124,6 @@ public class MyModel extends CS355Drawing{
 			Rectangle s = (Rectangle)selectedShape;
 			double c = s.getHeight()/2 + 20;
 			
-			worldToObj.translate(-s.getCenter().getX(), -(s.getCenter().getY()));
-			worldToObj.transform(worldCoord, objCoord);
 			if (objCoord.getX()*objCoord.getX() + (objCoord.getY()+c)*(objCoord.getY()+c) < (100)){
 				return true;
 			} 
@@ -137,8 +131,6 @@ public class MyModel extends CS355Drawing{
 			Ellipse s = (Ellipse)selectedShape;
 			double c = s.getHeight()/2 + 20;
 			
-			worldToObj.translate(-s.getCenter().getX(), -(s.getCenter().getY()));
-			worldToObj.transform(worldCoord, objCoord);
 			if (objCoord.getX()*objCoord.getX() + (objCoord.getY()+c)*(objCoord.getY()+c) < (100)){
 				return true;
 			} 
@@ -150,8 +142,6 @@ public class MyModel extends CS355Drawing{
 
 			double c = Math.max(lca, Math.max(lcb,lcc));	
 			
-			worldToObj.translate(-s.getCenter().getX(), -(s.getCenter().getY()));
-			worldToObj.transform(worldCoord, objCoord);
 			if (objCoord.getX()*objCoord.getX() + (objCoord.getY()+c)*(objCoord.getY()+c) < (100)){
 				return true;
 			} 
@@ -160,14 +150,14 @@ public class MyModel extends CS355Drawing{
 	}
 	
 	public int geometryTest(Point2D worldCoord, int tolerance) {
-		Point2D.Double objCoord = new Point2D.Double();
-		List<Shape> reversed = getShapesReversed();
-		
 		if(selectedShape != null) {
 			if(doHandleCheck(worldCoord)) {
 				return selectedIndex;
 			}
 		}
+		
+		Point2D.Double objCoord = new Point2D.Double();
+		List<Shape> reversed = getShapesReversed();
 		
 		for(int i = 0; i < reversed.size(); i++){
 			AffineTransform worldToObj = new AffineTransform();
@@ -189,7 +179,6 @@ public class MyModel extends CS355Drawing{
 				q.setLocation(x0 + t * d.getX(), y0 + t * d.getY());
 				double qdist = Math.sqrt((objCoord.getX() - q.getX())*(objCoord.getX() - q.getX()) + (objCoord.getY() - q.getY())*(objCoord.getY() - q.getY()));
 				if (qdist <= 4 && t >= -4 && t <= lineLength + 4){
-					GUIFunctions.printf("Selected Line");
 					selectedShape = l;
 					selectedIndex = shapeList.size()-i-1;
 					setChanged();
@@ -254,6 +243,7 @@ public class MyModel extends CS355Drawing{
 				}
 			}else{
 				selectedShape = null;
+				selectedIndex = -1;
 				setChanged();
 				notifyObservers();
 			}

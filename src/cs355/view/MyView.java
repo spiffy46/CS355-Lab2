@@ -47,7 +47,7 @@ public class MyView implements ViewRefresher{
 				objToWorld.rotate(l.getRotation());
 				toDrawOn.setTransform(objToWorld);
 				toDrawOn.setColor(l.getColor());
-				toDrawOn.drawLine((int)0, (int)0, (int)(l.getEnd().getX()-center.getX()), (int)(l.getEnd().getY()-center.getY()));
+				toDrawOn.drawLine(0,0,(int)(l.getEnd().getX()-center.getX()),(int)(l.getEnd().getY()-center.getY()));
 			} else if(s instanceof Square){
 				Square sq =(Square) s;
 				Point2D.Double center = sq.getCenter();
@@ -111,41 +111,31 @@ public class MyView implements ViewRefresher{
 	public void drawHandles(Shape s, Graphics2D g2d) {
 		AffineTransform objToWorld = new AffineTransform();
 		Graphics2D toDrawOn = (Graphics2D) g2d;
-
-		//TODO Need to handle line case
+		toDrawOn.setColor(Color.RED);
+		Point2D.Double center = s.getCenter();
+		objToWorld.translate(center.getX(), center.getY());
+		objToWorld.rotate(s.getRotation());
+		toDrawOn.setTransform(objToWorld);
+		
 		if(s instanceof Line){
 			Line l = (Line) s;
-			Point2D.Double center = l.getCenter();
 			Point2D.Double end = l.getEnd();
-			objToWorld.translate(center.getX(), center.getY());
-			toDrawOn.setTransform(objToWorld);
-			toDrawOn.setColor(Color.RED);
 			
 			toDrawOn.drawOval(-5, -5, 10, 10);
 			toDrawOn.drawOval((int)(end.getX()-center.getX())-5,(int)(end.getY()-center.getY())-5,10,10);
 		}else if(s instanceof Square){
 			Square sq =(Square) s;
-			Point2D.Double center = sq.getCenter();
 			double size = sq.getSize();
 			
-			objToWorld.translate(center.getX(), center.getY());
-			objToWorld.rotate(sq.getRotation());
-			toDrawOn.setTransform(objToWorld);
-			toDrawOn.setColor(Color.RED);
 			toDrawOn.drawRect((int)-size/2, (int)-size/2, (int)size, (int)size);
 			
 			double c = size/2 + 20;
 			toDrawOn.drawOval((int)-5, (int)-(c+5), 10, 10);
 		} else if(s instanceof Rectangle){
 			Rectangle r = (Rectangle) s;
-			Point2D.Double center = r.getCenter();
 			double width = r.getWidth();
 			double height = r.getHeight();
 			
-			objToWorld.translate(center.getX(), center.getY());
-			objToWorld.rotate(r.getRotation());
-			toDrawOn.setTransform(objToWorld);
-			toDrawOn.setColor(Color.RED);
 			toDrawOn.drawRect((int)(-width/2), (int)(-height/2), (int)width, (int)height);
 			
 			double c = height/2 + 20;
@@ -154,35 +144,21 @@ public class MyView implements ViewRefresher{
 			Circle c = (Circle) s;
 			Double radius = c.getRadius();
 			
-			objToWorld.translate(c.getCenter().getX(), c.getCenter().getY());
-			objToWorld.rotate(c.getRotation());
-			toDrawOn.setTransform(objToWorld);
-			toDrawOn.setColor(Color.RED);
 			toDrawOn.drawRect((int)-radius, (int)-radius, (int)(radius*2), (int)(radius*2));
 		}else if(s instanceof Ellipse){
 			Ellipse el = (Ellipse) s;
-			Point2D.Double center = el.getCenter();
 			int w = (int)el.getWidth();
 			int h = (int)el.getHeight();
 			
-			objToWorld.translate(center.getX(), center.getY());
-			objToWorld.rotate(el.getRotation());
-			toDrawOn.setTransform(objToWorld);
-			toDrawOn.setColor(Color.RED);
 			toDrawOn.drawRect((int)-w/2, (int)-h/2, w, h);
 			
 			double c = h/2 + 20;
 			toDrawOn.drawOval((int)-5, (int)-(c+5), 10, 10);
 		}else if(s instanceof Triangle){
 			Triangle t = (Triangle) s;
-			Point2D.Double center = t.getCenter();
 			int[] xc = {(int)(t.getA().x-center.getX()),(int)(t.getB().x-center.getX()),(int)(t.getC().x-center.getX())};
 			int[] yc = {(int)(t.getA().y-center.getY()),(int)(t.getB().y-center.getY()),(int)(t.getC().y-center.getY())};
 			
-			objToWorld.translate(center.getX(), center.getY());
-			objToWorld.rotate(t.getRotation());
-			toDrawOn.setTransform(objToWorld);
-			toDrawOn.setColor(Color.RED);
 			toDrawOn.drawPolygon(xc, yc, 3);
 			
 			double lca = Math.sqrt(Math.pow((t.getCenter().getX() - t.getA().getX()), 2) + Math.pow((t.getCenter().getY() - t.getA().getY()), 2));
